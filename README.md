@@ -4,7 +4,7 @@ This package will help you to send any request to any server in an asynchronous 
 Just follow the instructions in order to install and setup the async curl package.
 
 ```bash
-> composer install hasanparasteh/async-curl
+> composer require hasanparasteh/async-curl
 ```
 
 ## Quickstart Example
