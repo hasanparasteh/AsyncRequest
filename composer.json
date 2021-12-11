@@ -1,5 +1,5 @@
 {
-    "name": "hasanparasteh/async-curl",
+    "name": "hasanparasteh/async-request",
     "description": "Use async curl in reactphp project as easy as possible",
     "type": "library",
     "license": "MIT",
