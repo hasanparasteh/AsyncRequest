@@ -4,7 +4,7 @@ This package will help you to send any request to any server in an asynchronous 
 Just follow the instructions in order to install and setup the async curl package.
 
 ```bash
-> composer require hasanparasteh/async-curl
+> composer require hasanparasteh/async-request
 ```
 
 ## Quickstart Example
@@ -17,7 +17,7 @@ This is the simplest way to do a `GET` request. The results will be in a callabl
 4. error: `string`=> description of the curl error
 
 ```php
-$request = new AsyncCurl("https://reqres.in");
+$request = new AsyncRequest("https://reqres.in");
 $request->get("/api/users", ["page" => 2])->then(function ($result) {
     if (!$result['result'])
         echo "Curl Error cause {$result['error']}";

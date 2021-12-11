@@ -2,10 +2,10 @@
 
 require "vendor/autoload.php";
 
-use hasanparasteh\AsyncCurl;
+use hasanparasteh\AsyncRequest;
 
 
-$request = new AsyncCurl("https://httpstat.us", "72.221.172.203:4145");
+$request = new AsyncRequest("https://httpstat.us", "72.221.172.203:4145");
 $request->get("/200", ["sleep" => 66000])->then(function ($result) {
     if (!$result['result'])
         echo "Curl Error cause {$result['error']}";

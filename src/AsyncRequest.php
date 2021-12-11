@@ -10,7 +10,7 @@ use React\Promise\PromiseInterface;
 use React\Socket\Connector;
 use Throwable;
 
-class AsyncCurl
+class AsyncRequest
 {
     protected string $baseUrl;
     protected ?string $proxyUrl;
