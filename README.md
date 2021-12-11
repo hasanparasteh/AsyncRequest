@@ -1,4 +1,4 @@
-# Async Curl
+# Async HTTP Request
 
 This package will help you to send any request to any server in an asynchronous way!
 Just follow the instructions in order to install and setup the async curl package.
