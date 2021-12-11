@@ -1,4 +1,4 @@
-# Async HTTP Request
+# Async HTTP Request [![CodeFactor](https://www.codefactor.io/repository/github/hasanparasteh/asyncrequest/badge)](https://www.codefactor.io/repository/github/hasanparasteh/asyncrequest)
 
 This package will help you to send any request to any server in an asynchronous way!
 Just follow the instructions in order to install and setup the async curl package.
