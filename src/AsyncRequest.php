@@ -7,24 +7,23 @@ use Psr\Http\Message\ResponseInterface;
 use React\Http\Browser;
 use React\Http\Message\ResponseException;
 use React\Promise\PromiseInterface;
+use React\Promise\Timer\TimeoutException;
 use React\Socket\Connector;
 use Throwable;
+use function React\Promise\Timer\timeout;
 
 class AsyncRequest
 {
     protected string $baseUrl;
     protected ?string $proxyUrl;
     protected Browser $browser;
+    protected float $timeout;
 
-    /**
-     * @param string $baseUrl
-     * @param string|null $proxyUrl
-     * @param float $timeout
-     */
     public function __construct(string $baseUrl, string $proxyUrl = null, float $timeout = 5.0)
     {
         $this->baseUrl = $baseUrl;
         $this->proxyUrl = $proxyUrl;
+        $this->timeout = $timeout;
 
         $connectorOptions = [];
         $connectorOptions['timeout'] = $timeout;
@@ -118,28 +117,37 @@ class AsyncRequest
         else
             $req = $this->browser->request($type, $url, $headers);
 
-        return $req
-            ->then(function (ResponseInterface $response) {
+        return timeout($req, $this->timeout)->then(
+            function (ResponseInterface $response) {
                 $decodedResponse = json_decode($response->getBody()->getContents(), true);
                 return [
                     'result' => true,
                     'code' => $response->getStatusCode(),
                     'body' => $decodedResponse,
                 ];
-            }, function (Throwable $e) {
-                if ($e instanceof ResponseException) {
-                    $response = $e->getResponse();
-                    $decodedResponse = json_decode($response->getBody()->getContents(), true);
+            },
+            function ($error) {
+                if ($error instanceof TimeoutException) {
                     return [
-                        'result' => true,
-                        'code' => $response->getStatusCode(),
-                        'body' => $decodedResponse,
+                        'result' => false,
+                        'error' => $error->getMessage()
+                    ];
+                } else {
+                    if ($error instanceof ResponseException) {
+                        $response = $error->getResponse();
+                        $decodedResponse = json_decode($response->getBody()->getContents(), true);
+                        return [
+                            'result' => true,
+                            'code' => $response->getStatusCode(),
+                            'body' => $decodedResponse,
+                        ];
+                    }
+                    return [
+                        'result' => false,
+                        'error' => $error->getMessage()
                     ];
                 }
-                return [
-                    'result' => false,
-                    'error' => $e->getMessage()
-                ];
-            });
+            }
+        );
     }
 }
