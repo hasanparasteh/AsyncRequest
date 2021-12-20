@@ -5,8 +5,8 @@ require "vendor/autoload.php";
 use hasanparasteh\AsyncRequest;
 
 
-$request = new AsyncRequest("https://130.185.120.157:88");
-$request->get("/verify")->then(function ($result) {
+$request = new AsyncRequest("https://example.com");
+$request->get("/test")->then(function ($result) {
     if (!$result['result'])
         echo "Curl Error cause {$result['error']}";
     else
