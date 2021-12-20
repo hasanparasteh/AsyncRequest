@@ -9,7 +9,7 @@ use React\Http\Message\ResponseException;
 use React\Promise\PromiseInterface;
 use React\Promise\Timer\TimeoutException;
 use React\Socket\Connector;
-use Throwable;
+
 use function React\Promise\Timer\timeout;
 
 class AsyncRequest
@@ -117,6 +117,8 @@ class AsyncRequest
         else
             $req = $this->browser->request($type, $url, $headers);
 
+
+        // Added Request Timeout
         return timeout($req, $this->timeout)->then(
             function (ResponseInterface $response) {
                 $decodedResponse = json_decode($response->getBody()->getContents(), true);
