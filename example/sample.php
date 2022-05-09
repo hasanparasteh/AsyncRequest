@@ -7,19 +7,15 @@ use hasanparasteh\AsyncRequest;
 
 $request = new AsyncRequest("https://example.com");
 $request->get("/test")->then(function ($result) {
+    echo json_encode($result);
     if (!$result['result'])
         echo "Curl Error cause {$result['error']}";
     else
-        switch ($result['code']) {
-            case 200:
-                echo "Server Response 200 With " . json_encode($result['body'], 128);
-                break;
-            case 400:
-                echo "Server Response 400";
-                break;
-            case 500:
-                echo "Server Response 500";
-                break;
-            // .. and any other response Code
-        }
+        echo match ($result['code']) {
+            200 => "Server Response 200 With " . json_encode($result['body'], 128),
+            400 => "Server Response 400",
+            500 => "Server Response 500",
+            404 => "Server Response 404",
+            default => "Unexpected!",
+        };
 });

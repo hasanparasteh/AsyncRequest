@@ -110,7 +110,10 @@ class AsyncRequest
         if ($type == 'GET' && count($params) > 0)
             $url = $url . "?" . http_build_query($params);
 
-        $params = json_encode($params);
+        if (empty($params) || count($params) == 0)
+            $params = "";
+        else
+            $params = json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         if ($type != 'GET')
             $req = $this->browser->request($type, $url, $headers, $params);
