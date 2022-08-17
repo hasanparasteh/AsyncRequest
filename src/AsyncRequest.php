@@ -18,7 +18,7 @@ class AsyncRequest
     protected Browser $browser;
     protected float $timeout;
 
-    public function __construct(string $baseUrl, string $proxyUrl = null, float $timeout = 5.0, bool $bypass_ssl = false, bool $followRedirects = false)
+    public function __construct(string $baseUrl, string $proxyUrl = null, float $timeout = 5.0, bool $bypass_ssl = false, bool|int $followRedirects = false)
     {
         $this->baseUrl = $baseUrl;
         $this->proxyUrl = $proxyUrl;
@@ -43,9 +43,7 @@ class AsyncRequest
         $this->browser = new Browser(new Connector($connectorOptions));
         $this->browser->withRejectErrorResponse(true);
         $this->browser->withTimeout($timeout);
-
-        if ($followRedirects)
-            $this->browser->withFollowRedirects(true);
+        $this->browser->withFollowRedirects($followRedirects);
     }
 
 
