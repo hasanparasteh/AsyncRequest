@@ -3,6 +3,7 @@
 namespace hasanparasteh;
 
 use Clue\React\Socks\Client;
+use http\Encoding\Stream;
 use Psr\Http\Message\ResponseInterface;
 use React\Http\Browser;
 use React\Http\Message\ResponseException;
@@ -47,9 +48,9 @@ class AsyncRequest
      * @param string $contentType
      * @return PromiseInterface
      */
-    public function get(string $url, array $params = [], array $headers = [], string $contentType = 'application/json'): PromiseInterface
+    public function get(string $url, array $params = [], array $headers = [], string $contentType = 'application/json', bool $canResponseDecode = true): PromiseInterface
     {
-        return $this->request($url, $params, $headers, 'GET', $contentType);
+        return $this->request($url, $params, $headers, 'GET', $contentType, $canResponseDecode);
     }
 
 
@@ -60,9 +61,9 @@ class AsyncRequest
      * @param string $contentType
      * @return PromiseInterface
      */
-    public function post(string $url, array $params = [], array $headers = [], string $contentType = 'application/json'): PromiseInterface
+    public function post(string $url, array $params = [], array $headers = [], string $contentType = 'application/json', bool $canResponseDecode = true): PromiseInterface
     {
-        return $this->request($url, $params, $headers, 'POST', $contentType);
+        return $this->request($url, $params, $headers, 'POST', $contentType, $canResponseDecode);
     }
 
     /**
@@ -72,9 +73,9 @@ class AsyncRequest
      * @param string $contentType
      * @return PromiseInterface
      */
-    public function put(string $url, array $params = [], array $headers = [], string $contentType = 'application/json'): PromiseInterface
+    public function put(string $url, array $params = [], array $headers = [], string $contentType = 'application/json', bool $canResponseDecode = true): PromiseInterface
     {
-        return $this->request($url, $params, $headers, 'PUT', $contentType);
+        return $this->request($url, $params, $headers, 'PUT', $contentType, $canResponseDecode);
     }
 
 
@@ -85,9 +86,9 @@ class AsyncRequest
      * @param string $contentType
      * @return PromiseInterface
      */
-    public function patch(string $url, array $params = [], array $headers = [], string $contentType = 'application/json'): PromiseInterface
+    public function patch(string $url, array $params = [], array $headers = [], string $contentType = 'application/json', bool $canResponseDecode = true): PromiseInterface
     {
-        return $this->request($url, $params, $headers, 'PATCH', $contentType);
+        return $this->request($url, $params, $headers, 'PATCH', $contentType, $canResponseDecode);
     }
 
     /**
@@ -97,12 +98,12 @@ class AsyncRequest
      * @param string $contentType
      * @return PromiseInterface
      */
-    public function delete(string $url, array $params = [], array $headers = [], string $contentType = 'application/json'): PromiseInterface
+    public function delete(string $url, array $params = [], array $headers = [], string $contentType = 'application/json', bool $canResponseDecode = true): PromiseInterface
     {
-        return $this->request($url, $params, $headers, 'DELETE', $contentType);
+        return $this->request($url, $params, $headers, 'DELETE', $contentType, $canResponseDecode);
     }
 
-    private function request(string $url, array $params = [], array $headers = [], string $type = 'GET', string $contentType = 'application/json'): PromiseInterface
+    private function request(string $url, array $params = [], array $headers = [], string $type = 'GET', string $contentType = 'application/json', bool $canResponseDecode = true): PromiseInterface
     {
         $url = $this->baseUrl . $url;
         $headers['Content-Type'] = $contentType;
@@ -123,35 +124,30 @@ class AsyncRequest
 
         // Added Request Timeout
         return timeout($req, $this->timeout)->then(
-            function (ResponseInterface $response) {
-                $decodedResponse = json_decode($response->getBody()->getContents(), true);
+            function (ResponseInterface $response) use ($canResponseDecode) {
                 return [
                     'result' => true,
                     'code' => $response->getStatusCode(),
-                    'body' => $decodedResponse,
+                    'body' => $canResponseDecode
+                        ? json_decode($response->getBody()->getContents(), true)
+                        : $response->getBody()->getContents()
                 ];
             },
-            function ($error) {
-                if ($error instanceof TimeoutException) {
+            function ($error) use ($canResponseDecode) {
+                if ($error instanceof ResponseException) {
+                    $response = $error->getResponse();
                     return [
-                        'result' => false,
-                        'error' => $error->getMessage()
-                    ];
-                } else {
-                    if ($error instanceof ResponseException) {
-                        $response = $error->getResponse();
-                        $decodedResponse = json_decode($response->getBody()->getContents(), true);
-                        return [
-                            'result' => true,
-                            'code' => $response->getStatusCode(),
-                            'body' => $decodedResponse,
-                        ];
-                    }
-                    return [
-                        'result' => false,
-                        'error' => $error->getMessage()
+                        'result' => true,
+                        'code' => $response->getStatusCode(),
+                        'body' => $canResponseDecode
+                            ? json_decode($response->getBody()->getContents(), true)
+                            : $response->getBody()->getContents()
                     ];
                 }
+                return [
+                    'result' => false,
+                    'error' => $error->getMessage()
+                ];
             }
         );
     }

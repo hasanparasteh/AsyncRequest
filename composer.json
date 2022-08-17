@@ -1,27 +1,27 @@
 {
-    "name": "hasanparasteh/async-request",
-    "description": "Use async curl in reactphp project as easy as possible",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "hasanparasteh\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Hasan Parasteh",
-            "email": "hasanparasteh@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=8.0.0",
-        "react/http": "^1.5.0",
-        "clue/socks-react": "^1.3.0",
-        "react/promise-timer": "^1.8"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.5"
-    },
-    "minimum-stability": "dev"
+  "name": "hasanparasteh/async-request",
+  "description": "Use async curl in reactphp project as easy as possible",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "hasanparasteh\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Hasan Parasteh",
+      "email": "hasanparasteh@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=8.0.0",
+    "react/http": "^1.6.0",
+    "clue/socks-react": "^1.3.0",
+    "react/promise-timer": "^1.9.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5"
+  },
+  "minimum-stability": "dev"
 }
