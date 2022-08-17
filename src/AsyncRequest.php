@@ -40,10 +40,9 @@ class AsyncRequest
             ];
 
 
-        $this->browser = new Browser(new Connector($connectorOptions));
-        $this->browser->withRejectErrorResponse(true);
-        $this->browser->withTimeout($timeout);
-        $this->browser->withFollowRedirects($followRedirects);
+        $this->browser = (new Browser(new Connector($connectorOptions)))
+            ->withTimeout($timeout)
+            ->withFollowRedirects($followRedirects);
     }
 
 
@@ -134,6 +133,7 @@ class AsyncRequest
                 return [
                     'result' => true,
                     'code' => $response->getStatusCode(),
+                    'headers' => $response->getHeaders(),
                     'body' => $canResponseDecode
                         ? json_decode($response->getBody()->getContents(), true)
                         : $response->getBody()->getContents()
@@ -145,11 +145,13 @@ class AsyncRequest
                     return [
                         'result' => true,
                         'code' => $response->getStatusCode(),
+                        'headers' => $response->getHeaders(),
                         'body' => $canResponseDecode
                             ? json_decode($response->getBody()->getContents(), true)
                             : $response->getBody()->getContents()
                     ];
                 }
+
                 return [
                     'result' => false,
                     'error' => $error->getMessage()
