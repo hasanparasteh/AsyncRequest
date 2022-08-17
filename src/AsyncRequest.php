@@ -3,12 +3,10 @@
 namespace hasanparasteh;
 
 use Clue\React\Socks\Client;
-use http\Encoding\Stream;
 use Psr\Http\Message\ResponseInterface;
 use React\Http\Browser;
 use React\Http\Message\ResponseException;
 use React\Promise\PromiseInterface;
-use React\Promise\Timer\TimeoutException;
 use React\Socket\Connector;
 
 use function React\Promise\Timer\timeout;
@@ -20,7 +18,7 @@ class AsyncRequest
     protected Browser $browser;
     protected float $timeout;
 
-    public function __construct(string $baseUrl, string $proxyUrl = null, float $timeout = 5.0)
+    public function __construct(string $baseUrl, string $proxyUrl = null, float $timeout = 5.0, bool $bypass_ssl = false, bool $followRedirects = false)
     {
         $this->baseUrl = $baseUrl;
         $this->proxyUrl = $proxyUrl;
@@ -35,9 +33,19 @@ class AsyncRequest
             $connectorOptions['dns'] = false;
         }
 
+        if ($bypass_ssl)
+            $connectorOptions['tls'] = [
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            ];
+
+
         $this->browser = new Browser(new Connector($connectorOptions));
         $this->browser->withRejectErrorResponse(true);
         $this->browser->withTimeout($timeout);
+
+        if ($followRedirects)
+            $this->browser->withFollowRedirects(true);
     }
 
 
