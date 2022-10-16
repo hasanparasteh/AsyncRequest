@@ -129,14 +129,29 @@ class AsyncRequest
 
         // Added Request Timeout
         return timeout($req, $this->timeout)->then(
-            function (ResponseInterface $response) use ($canResponseDecode) {
+            function ($response) use ($canResponseDecode) {
+                if($response instanceof  ResponseInterface){
+                    return [
+                        'result' => true,
+                        'code' => $response->getStatusCode(),
+                        'headers' => $response->getHeaders(),
+                        'body' => $canResponseDecode
+                            ? json_decode($response->getBody()->getContents(), true)
+                            : $response->getBody()->getContents()
+                    ];
+                }
+
+                if($response instanceof ResponseException){
+                    return [
+                        'result' => false,
+                        'code' => $response->getCode(),
+                        'body' => $response->getTraceAsString()
+                    ];
+                }
+
                 return [
-                    'result' => true,
-                    'code' => $response->getStatusCode(),
-                    'headers' => $response->getHeaders(),
-                    'body' => $canResponseDecode
-                        ? json_decode($response->getBody()->getContents(), true)
-                        : $response->getBody()->getContents()
+                    'result' => false,
+                    'code' => 100_000,
                 ];
             },
             function ($error) use ($canResponseDecode) {
