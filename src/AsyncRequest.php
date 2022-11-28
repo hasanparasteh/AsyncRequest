@@ -118,6 +118,10 @@ class AsyncRequest
 
         if (empty($params) || count($params) == 0)
             $params = "";
+        else if(str_contains($contentType, "form")){
+            $params = http_build_query($params);
+            $canResponseDecode = false;
+        }
         else
             $params = json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
