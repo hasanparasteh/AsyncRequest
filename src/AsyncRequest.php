@@ -18,6 +18,8 @@ class AsyncRequest
     protected Browser $browser;
     protected float $timeout;
 
+    protected array $headers = [];
+
     public function __construct(string $baseUrl, string $proxyUrl = null, float $timeout = 5.0, bool $bypass_ssl = false, bool|int $followRedirects = false)
     {
         $this->baseUrl = $baseUrl;
@@ -113,16 +115,18 @@ class AsyncRequest
         $url = $this->baseUrl . $url;
         $headers['Content-Type'] = $contentType;
 
+        if (count($this->headers) > 0)
+            $headers = array_merge($headers, $this->headers);
+
         if ($type == 'GET' && count($params) > 0)
             $url = $url . "?" . http_build_query($params);
 
         if (empty($params) || count($params) == 0)
             $params = "";
-        else if(str_contains($contentType, "form")){
+        else if (str_contains($contentType, "form")) {
             $params = http_build_query($params);
             $canResponseDecode = false;
-        }
-        else
+        } else
             $params = json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         if ($type != 'GET')
@@ -134,7 +138,7 @@ class AsyncRequest
         // Added Request Timeout
         return timeout($req, $this->timeout)->then(
             function ($response) use ($canResponseDecode) {
-                if($response instanceof  ResponseInterface){
+                if ($response instanceof ResponseInterface) {
                     return [
                         'result' => true,
                         'code' => $response->getStatusCode(),
@@ -145,7 +149,7 @@ class AsyncRequest
                     ];
                 }
 
-                if($response instanceof ResponseException){
+                if ($response instanceof ResponseException) {
                     return [
                         'result' => false,
                         'code' => $response->getCode(),
@@ -177,5 +181,11 @@ class AsyncRequest
                 ];
             }
         );
+    }
+
+    public function addHeaders(array $headers): AsyncRequest
+    {
+        $this->headers = array_merge($this->headers, $headers);
+        return $this;
     }
 }
