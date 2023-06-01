@@ -17,6 +17,7 @@ class AsyncRequest
     protected ?string $proxyUrl;
     protected Browser $browser;
     protected float $timeout;
+    protected bool $isLoggingEnabled = false;
 
     protected array $headers = [];
 
@@ -45,6 +46,16 @@ class AsyncRequest
         $this->browser = (new Browser(new Connector($connectorOptions)))
             ->withTimeout($timeout)
             ->withFollowRedirects($followRedirects);
+    }
+
+    public function enableLogging(): void
+    {
+        $this->isLoggingEnabled = true;
+    }
+
+    public function disabledLogging(): void
+    {
+        $this->isLoggingEnabled = false;
     }
 
 
@@ -129,6 +140,14 @@ class AsyncRequest
         } else
             $params = json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
+        if ($this->isLoggingEnabled) {
+            echo '------------------ REQUEST ------------------' . PHP_EOL;
+            echo "Requesting $url and METHOD is: " . $type . PHP_EOL;
+            echo "Body is: " . PHP_EOL . json_encode($params, 128) . PHP_EOL;
+            echo "Header is: " . PHP_EOL . json_encode($headers, 128) . PHP_EOL;
+            echo '------------------ END OF REQUEST ------------------' . PHP_EOL;
+        }
+
         if ($type != 'GET')
             $req = $this->browser->request($type, $url, $headers, $params);
         else
@@ -139,6 +158,15 @@ class AsyncRequest
         return timeout($req, $this->timeout)->then(
             function ($response) use ($canResponseDecode) {
                 if ($response instanceof ResponseInterface) {
+                    if ($this->isLoggingEnabled) {
+                        echo '------------------ RESPONSE ------------------' . PHP_EOL;
+                        echo 'Status Code: ' . $response->getStatusCode() . PHP_EOL;
+                        echo 'Headers is: ' . json_encode($response->getHeaders(), 128) . PHP_EOL;
+                        echo 'Body is: ' . $canResponseDecode
+                            ? json_decode($response->getBody()->getContents(), true)
+                            : $response->getBody()->getContents() . PHP_EOL;
+                        echo '------------------ END OF RESPONSE ------------------' . PHP_EOL;
+                    }
                     return [
                         'result' => true,
                         'code' => $response->getStatusCode(),
@@ -150,6 +178,14 @@ class AsyncRequest
                 }
 
                 if ($response instanceof ResponseException) {
+                    if ($this->isLoggingEnabled) {
+                        echo '------------------ RESPONSE EXCEPTION ------------------' . PHP_EOL;
+                        echo 'Status Code: ' . $response->getCode() . PHP_EOL;
+                        echo 'Error: ' . $response->getTraceAsString() . PHP_EOL;
+                        echo '------------------ END OF RESPONSE EXCEPTION ------------------' . PHP_EOL;
+
+                    }
+
                     return [
                         'result' => false,
                         'code' => $response->getCode(),
@@ -165,6 +201,16 @@ class AsyncRequest
             function ($error) use ($canResponseDecode) {
                 if ($error instanceof ResponseException) {
                     $response = $error->getResponse();
+                    if ($this->isLoggingEnabled) {
+                        echo '------------------ RESPONSE ------------------' . PHP_EOL;
+                        echo 'Status Code: ' . $response->getStatusCode() . PHP_EOL;
+                        echo 'Headers is: ' . json_encode($response->getHeaders(), 128) . PHP_EOL;
+                        echo 'Body is: ' . $canResponseDecode
+                            ? json_decode($response->getBody()->getContents(), true)
+                            : $response->getBody()->getContents() . PHP_EOL;
+                        echo '------------------ END OF RESPONSE ------------------' . PHP_EOL;
+                    }
+
                     return [
                         'result' => true,
                         'code' => $response->getStatusCode(),
