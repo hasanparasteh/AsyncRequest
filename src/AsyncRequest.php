@@ -19,6 +19,8 @@ class AsyncRequest
     protected float $timeout;
     protected bool $isLoggingEnabled = false;
 
+    protected array $headers = [];
+
     public function __construct(string $baseUrl, string $proxyUrl = null, float $timeout = 5.0, bool $bypass_ssl = false, bool|int $followRedirects = false)
     {
         $this->baseUrl = $baseUrl;
@@ -124,6 +126,9 @@ class AsyncRequest
         $url = $this->baseUrl . $url;
         $headers['Content-Type'] = $contentType;
 
+        if (count($this->headers) > 0)
+            $headers = array_merge($headers, $this->headers);
+
         if ($type == 'GET' && count($params) > 0)
             $url = $url . "?" . http_build_query($params);
 
@@ -162,7 +167,6 @@ class AsyncRequest
                             : $response->getBody()->getContents() . PHP_EOL;
                         echo '------------------ END OF RESPONSE ------------------' . PHP_EOL;
                     }
-
                     return [
                         'result' => true,
                         'code' => $response->getStatusCode(),
@@ -223,5 +227,11 @@ class AsyncRequest
                 ];
             }
         );
+    }
+
+    public function addHeaders(array $headers): AsyncRequest
+    {
+        $this->headers = array_merge($this->headers, $headers);
+        return $this;
     }
 }
