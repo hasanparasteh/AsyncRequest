@@ -158,23 +158,46 @@ class AsyncRequest
         return timeout($req, $this->timeout)->then(
             function ($response) use ($canResponseDecode) {
                 if ($response instanceof ResponseInterface) {
-                    if ($this->isLoggingEnabled) {
-                        echo '------------------ RESPONSE ------------------' . PHP_EOL;
-                        echo 'Status Code: ' . $response->getStatusCode() . PHP_EOL;
-                        echo 'Headers is: ' . json_encode($response->getHeaders(), 128) . PHP_EOL;
-                        echo 'Body is: ' . $canResponseDecode
-                            ? json_decode($response->getBody()->getContents(), true)
-                            : $response->getBody()->getContents() . PHP_EOL;
-                        echo '------------------ END OF RESPONSE ------------------' . PHP_EOL;
+                    if (str_contains($response->getHeaderLine('Content-Type'), "image/") ||
+                        str_contains($response->getHeaderLine('Content-Type'), "video/")
+                    ) {
+
+                        if ($this->isLoggingEnabled) {
+                            echo '------------------ RESPONSE ------------------' . PHP_EOL;
+                            echo 'Status Code: ' . $response->getStatusCode() . PHP_EOL;
+                            echo 'Headers is: ' . json_encode($response->getHeaders(), 128) . PHP_EOL;
+                            echo 'Body is: ' . $response->getBody()->__toString() . PHP_EOL;
+                            echo '------------------ END OF RESPONSE ------------------' . PHP_EOL;
+                        }
+
+                        return [
+                            'result' => true,
+                            'code' => $response->getStatusCode(),
+                            'headers' => $response->getHeaders(),
+                            'body' => $response->getBody()->__toString()
+                        ];
+                    } else {
+
+                        if ($this->isLoggingEnabled) {
+                            echo '------------------ RESPONSE ------------------' . PHP_EOL;
+                            echo 'Status Code: ' . $response->getStatusCode() . PHP_EOL;
+                            echo 'Headers is: ' . json_encode($response->getHeaders(), 128) . PHP_EOL;
+                            echo 'Body is: ' . $canResponseDecode
+                                ? json_decode($response->getBody()->getContents(), true)
+                                : $response->getBody()->getContents() . PHP_EOL;
+                            echo '------------------ END OF RESPONSE ------------------' . PHP_EOL;
+                        }
+
+                        return [
+                            'result' => true,
+                            'code' => $response->getStatusCode(),
+                            'headers' => $response->getHeaders(),
+                            'body' => $canResponseDecode
+                                ? json_decode($response->getBody()->getContents(), true)
+                                : $response->getBody()->getContents()
+                        ];
                     }
-                    return [
-                        'result' => true,
-                        'code' => $response->getStatusCode(),
-                        'headers' => $response->getHeaders(),
-                        'body' => $canResponseDecode
-                            ? json_decode($response->getBody()->getContents(), true)
-                            : $response->getBody()->getContents()
-                    ];
+
                 }
 
                 if ($response instanceof ResponseException) {
